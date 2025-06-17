@@ -1,0 +1,186 @@
+﻿#define SI00001
+
+namespace GameOfLife
+{
+	internal class Program
+	{
+		const int nDelay = 1000;
+
+		const int nMinX = 0;
+		const int nMinY = 0;
+		const int nMaxX = 13;
+		const int nMaxY = 13;
+
+		static int[,] anMap = new int[nMaxX,nMaxY];
+
+		static void Main(string[] args)
+		{
+			Console.Title = "Game of Life - Reduzer";
+			Console.ForegroundColor = ConsoleColor.White;
+
+#if SI00001
+			ProgrammedInput();
+#else
+			PrepareGame();
+#endif
+			while(CheckForLife()){
+				Draw();
+				CalculateNewGeneration();
+			}
+
+			Console.ReadKey();
+		}
+
+		public static void PrepareGame(){
+			Console.WriteLine("-----------------");
+			Console.WriteLine("With how many spots do you wanna start?");
+			Console.WriteLine("-----------------");
+			try{
+				int nAmount = Convert.ToInt32(Console.ReadLine());
+				GenerateRandom(nAmount);
+			}
+			catch(Exception e){
+				Console.WriteLine("tf machst du bitte????");
+			}
+			
+			Console.Clear();
+		}
+
+		private static void ProgrammedInput(){
+			anMap = new int[nMaxX,nMaxY]
+			{
+				{0,0,0,0,0,0,0,0,0,0,0,0,0 },
+				{0,0,0,0,0,0,0,0,0,0,0,0,0 },
+				{0,0,0,0,0,0,0,0,0,0,0,0,0 },
+				{0,0,0,0,0,0,0,0,0,0,0,0,0 },
+				{0,0,0,0,1,1,1,0,0,0,0,0,0 },
+				{0,0,0,0,1,0,1,0,0,0,0,0,0 },
+				{0,0,0,0,0,0,0,0,0,0,0,0,0 },
+				{0,0,0,0,1,0,1,0,0,0,0,0,0 },
+				{0,0,0,0,1,1,1,0,0,0,0,0,0 },
+				{0,0,0,0,0,0,0,0,0,0,0,0,0 },
+				{0,0,0,0,0,0,0,0,0,0,0,0,0 },
+				{0,0,0,0,0,0,0,0,0,0,0,0,0 },
+				{0,0,0,0,0,0,0,0,0,0,0,0,0 }
+			};
+		}
+
+		private static void GenerateRandom(int nAmount){
+			Random oRand = new Random();
+			for(int i = 0; i < nAmount; i++){
+				int nX = oRand.Next(nMinX, nMaxX);
+				int nY = oRand.Next(nMinY, nMaxY);
+				
+				anMap[nX, nY] = 1;
+			}
+		}
+
+		private static void Draw(){
+			for(int i = 0; i < nMaxX; i++){
+				for(int j = 0; j < nMaxY; j++){
+					if(anMap[i,j] == 1){
+						Console.Write("X");
+					}
+					else{
+						Console.Write("0");
+					}
+				}
+				Console.Write("\n");
+			}
+			Console.SetCursorPosition(0, 0);
+			Thread.Sleep(nDelay);
+		}
+
+		private static bool CheckForLife(){
+			for(int i = 0; i < nMaxX; i++){
+				for(int j = 0; j < nMaxY; j++){
+					if(anMap[i,j] == 1){
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		private static int CheckForNeighbours(int x, int y){
+			int nCounter = 0;
+			
+			int up = y - 1;
+			int down = y + 1;
+			int left = x - 1;
+			int right = x + 1;
+
+			if(x == 0){
+				left = 0;
+			}
+
+			if(x == nMaxX - 1){
+				right = nMaxX - 1;
+			}
+
+			if(y == 0){
+				up = 0;
+			}
+
+			if(y == nMaxY - 1){
+				down = nMaxY - 1;
+			}
+
+			//Upper Row
+			if(anMap[left, up] == 1){
+				nCounter++;
+			}
+
+			if(anMap[x, up] == 1){
+				nCounter++;
+			}
+
+			if(anMap[right, up] == 1){
+				nCounter++;
+			}
+
+			//Middle Row
+			if(anMap[left, y] == 1){
+				nCounter++;
+			}
+
+			if(anMap[right, y] == 1){
+				nCounter++;
+			}
+
+			//Lower Row
+			if(anMap[left, down] == 1){
+				nCounter++;
+			}
+
+			if(anMap[x, down] == 1){
+				nCounter++;
+			}
+
+			if(anMap[right, down] == 1){
+				nCounter++;
+			}
+
+			return nCounter;
+		}
+
+		private static void CalculateNewGeneration(){
+			int[,] anTemp = new int[nMaxX, nMaxY];
+
+			for(int i = 0; i < nMaxX; i++){
+				for(int j = 0; j < nMaxY; j++){
+					if(CheckForNeighbours(i,j) < 3 || CheckForNeighbours(i,j) > 3){
+						anTemp[i,j] = 0;
+					}
+
+					if(CheckForNeighbours(i,j) == 3){
+						anTemp[i,j] = 1;
+					}
+				}
+			}
+
+			anMap = anTemp;
+		}
+	}
+}
